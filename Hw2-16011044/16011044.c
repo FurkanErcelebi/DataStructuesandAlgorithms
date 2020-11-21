@@ -18,12 +18,13 @@ Node *root;
 int ListSize()
 {
     int size = 0;
-	Node *current = root;
+    Node *current = root;
+	
     while (current != NULL)
-	{
-		current = current->next;
-		size++;
-	}
+    {
+	current = current->next;
+	size++;
+    }
 	return size;
 }
 
@@ -38,13 +39,13 @@ void CreateRoot(char letter)
 	    root->chr=letter;
 	    root->freq=1;
 	    root->left=NULL;
-        root->right=NULL;
-        root->next=NULL;
-    } 
-    else 
+            root->right=NULL;
+            root->next=NULL;
+    	} 
+        else 
 	{
-    	printf("Yer ayrilacak alan kalmadi\n");
-		return ; 
+    	    printf("Yer ayrilacak alan kalmadi\n");
+	    return ; 
 	}
 }
 
@@ -53,15 +54,18 @@ void CreateRoot(char letter)
 bool freqControl(char str)
 {
 	Node *count=root;
+	
 	while(count!=NULL)
 	{
 		if(count->chr==str)
 		{
-			count->freq++;
-			return true;
+		    count->freq++;
+		    return true;
 		}
-        count = count->next;
+		
+            count = count->next;
 	}
+	
 	return false;
 }
 
@@ -70,19 +74,21 @@ bool freqControl(char str)
 Node *CreateNode(char chr1)
 {
 	Node *node=(Node*)malloc(sizeof(Node));
+	
 	if(node!=NULL)
 	{
 	    node->chr = chr1;
-        node->freq=1;
+            node->freq=1;
 	    node->next=NULL;
-        node->right=NULL;
-        node->left=NULL;
-    }
-    else 
+            node->right=NULL;
+            node->left=NULL;
+        }
+        else 
 	{
-        printf("Yer ayrilacak alan kalmadi\n");
+            printf("Yer ayrilacak alan kalmadi\n");
 	    return node; 
 	}
+	
 	return node; 
 }
 
@@ -92,13 +98,15 @@ void InsertNode(char chr1)
 {
 	
 	Node *node,*tmp;
+	
 	if(!(freqControl(chr1))) 
 	{
-		node=CreateNode(chr1);
-		tmp=root;
+	    node=CreateNode(chr1);
+	    tmp=root;
 	    root=node;
 	    root->next=tmp;
 	}
+	
 }
 
 //---Listenin basi cikartilmsai
@@ -107,43 +115,54 @@ Node *ExtractNode()
 {
     Node *extract,*swap; 
     extract = root;
-	swap = root->next;
-	extract->next = NULL;
-	root = swap;
-	return extract;
+    swap = root->next;
+    extract->next = NULL;
+    root = swap;
+    return extract;
 }
 
 //---Agac gosterimi
 
 void TreeTraversal(Node *root1,int shift)
 {
-	int r,l;
+    int r,l;
+	
     if(root1)
-	{
+    {
         printf("%c:%d\n",root1->chr,root1->freq);
-		if (root1->right)
-	    {
+		
+	if (root1->right)
+	{
             for (r = 0; r < shift-1; r++)
-		        printf(" ");	  	
-            printf("|");
-		    printf("\n");
-		    for (r = 0; r < shift; r++)
-		        printf(" ");
-		    printf("r-");	  
-		    TreeTraversal(root1->right,shift+2);
-	    } 
-		if (root1->left)
-		{
-		    for (l = 0; l < shift-1; l++)
-			   printf(" "); 	
-			printf("|");		
-            printf("\n");
-            for (l = 0; l < shift; l++)
 		        printf(" ");	
-		    printf("l-");	
+		
+            printf("|");
+	    printf("\n");
+		
+	    for (r = 0; r < shift; r++)
+                printf(" ");
+		   
+	    printf("r-");	  
+		    
+	    TreeTraversal(root1->right,shift+2);
+	} 
+	    
+	if (root1->left)
+	{
+	    for (l = 0; l < shift-1; l++)
+		printf(" "); 	
+			
+	    printf("|");		
+            printf("\n");
+		
+            for (l = 0; l < shift; l++)
+	        printf(" ");	
+		    
+	    printf("l-");
+		
             TreeTraversal(root1->left,shift+2);
         }
-	}
+    }
 }
   
 //---Liste ve agci gosterme
