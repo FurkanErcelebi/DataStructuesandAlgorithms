@@ -76,9 +76,10 @@ void addNodeandAdjacent(Graph *one_graph,char *str1,char *str2,int num1,int num2
     addr_node1 = findNode(one_graph,str1,*(list_size));
     if(addr_node1 == -1){
         ++(*list_size);
-        addr_node1 = *(list_size) - 1;
-        if( (one_graph->node_list[addr_node1].query_str = malloc(strlen(str1) + 1)) == NULL)
-			return ;
+        addr_node1 = (*list_size) - 1;
+        /*if( (one_graph->node_list[addr_node1].query_str = malloc(strlen(str1) + 1)) == NULL)
+			return ;*/
+		one_graph->node_list[addr_node1].query_str = malloc(strlen(str1) + 1);
         strcpy(one_graph->node_list[addr_node1].query_str,str1);
         one_graph->node_list[addr_node1].query_num = num1;
         one_graph->node_list[addr_node1].adjacent_list_head = NULL;
@@ -126,15 +127,14 @@ void addNodeandAdjacent(Graph *one_graph,char *str1,char *str2,int num1,int num2
 }
 
 void mergeTwoGraph(Graph *graph_one,Graph *graph_two,Graph *graph_three,int *size_of_graph){
-	graph_three = graph_one;
 	
 	Node *current_node = graph_three->node_list;
 	Node *tmp_node;
-	Adj *tmp_adj;
-	int i,j,size1,size2,extra,addr_node,addr_adj,end;
+	Adj *tmp_adj,*current_adj;
+	int i,j,size1,size2,extra,addr_node,addr_adj,end,addr_node1;
 	
-	for(i = 0;i < graph_one->node_num;i++){
-		addr_node = findNode(graph_two,graph_one->node_list[i].query_str,graph_two->node_num);
+	for(i = 0;i < graph_two->node_num;i++){
+		addr_node = findNode(graph_one,graph_two->node_list[i].query_str,graph_one->node_num);
 		if(addr_node == -1){
 			extra++;
 		}
@@ -147,51 +147,69 @@ void mergeTwoGraph(Graph *graph_one,Graph *graph_two,Graph *graph_three,int *siz
 	}
 	
 	size1 = graph_one->node_num;
+	for(i = 0;i < graph_two->node_num;i++){
+		addr_node = findNode(graph_three,graph_two->node_list[i].query_str,size1);
+		
+		if(addr_node == -1){
+			
+			graph_three->node_list[size1].query_str = (char*)malloc(strlen(graph_two->node_list[i].query_str) * sizeof(char) + 1);
+			strcpy(graph_three->node_list[size1].query_str,graph_two->node_list[i].query_str);
+			graph_three->node_list[size1].query_num = graph_two->node_list[i].query_num;
+			graph_three->node_list[size1].adjacent_list_head = NULL;
+			size1++;
+			
+			current_adj = graph_two->node_list[i].adjacent_list_head;
+			
+			/*while(current_adj != NULL){
+				addr_node1 = findNode(graph_three,graph_two->node_list[current_adj->addr].query_str,size1);
+				
+				if(addr_node1 != -1){
+			        Adj *current_adj1 = (Adj*)malloc(sizeof(Adj));
+			        current_adj1->next = NULL;
+			        current_adj1->addr = size1;
+			        tmp_adj = getLastAdj(graph_three->node_list[addr_node1]);
+			        if(tmp_adj == NULL){
+			            graph_three->node_list[addr_node1].adjacent_list_head = current_adj1;
+			        }
+			        else{
+			            tmp_adj->next = current_adj1; 
+			        }
+				}
+				
+				current_adj = current_adj->next;
+			}*/
+			
+		}
+	}
+	
 	for(i = 0;i < graph_three->node_num;i++){
 		addr_node = findNode(graph_two,graph_three->node_list[i].query_str,graph_two->node_num);
 		
 		if(addr_node != -1){
-			addr_adj = findAdj(graph_three->node_list[i],graph_two->node_list[addr_node].query_str);
-			
-			if(addr_adj == -1){	
-			    graph_three->node_list[size1] = graph_two->node_list[addr_node];
-		        Adj *current_adj = (Adj*)malloc(sizeof(Adj));
-		        current_adj->next = NULL;
-		        current_adj->addr = size1;
-		        tmp_adj = getLastAdj(graph_three->node_list[size1]);
-		        if(tmp_adj == NULL){
-		            graph_one->node_list[addr_node1].adjacent_list_head = current_adj1;
-		        }
-		        else{
-		            tmp_adj->next = current_adj1; 
-		        }
-		        size1++;
+			current_adj = graph_two->node_list[addr_node].adjacent_list_head;
+			while(current_adj != NULL){
+				
+				addr_node1 = findNode(graph_three,graph_two->node_list[current_adj->addr].query_str,graph_three->node_num);
+				
+				Adj *current_adj1 = (Adj*)malloc(sizeof(Adj));
+				current_adj1->next = NULL;
+				current_adj1->addr = addr_node1;
+				tmp_adj = getLastAdj(graph_three->node_list[i]);
+				if(tmp_adj == NULL){
+					graph_three->node_list[i].adjacent_list_head = current_adj1;
+				}
+				else{
+				    tmp_adj->next = current_adj1; 
+				}
+				        
+				current_adj = current_adj->next;
 			}
-		}
-	}
-	
-	size2 = graph_one->node_num;
-	while(size1 < graph_three->node_num){
-		addr_node = findNode(graph_two,graph_three->node_list[size2].query_str,graph_two->node_num);
-		tmp_adj = graph_two->node_list[addr_node];
-		
-		while(tmp_adj != NULL){
-			addr_node = findNode(graph_three,graph_two->node_list[tmp_adj->addr].query_str,graph_three->node_num);
 			
-			if(addr_node == -1){
-		    	addNodeandAdjacent(graph_three
-									,graph_three->node_list[size2].query_str
-									,graph_two->node_list[tmp_adj->addr].query_str
-									,graph_three->node_list[size2].query_num
-									,graph_two->node_list[tmp_adj->addr].query_num
-									,size1);
-			}
 		}
 		
-		size2++;
 	}
 	
-	(*size_of_graph) = size;
+	(*size_of_graph) = graph_three->node_num;
 	
 }
 
@@ -216,21 +234,54 @@ void printGraph(Graph *one_graph,int len){
 
 void searchInGraph(Graph *graph,char *search){
 	
-	Graph *tmp = node_list_size3;
+	Graph *tmp_graph = graph;
 	
-	int addr = findNode(tmp,search,tmp->node_num);
+	int addr = findNode(tmp_graph,search,tmp_graph->node_num);
 	
 	if(addr == -1){
-		printf("\nAradiğiniz grafta bulunamammistir!\n")
+		printf("\nAradiginiz grafta bulunamammistir!\n");
 	}
 	else{
-		Node array[tmp->node_num];
+		Node array[tmp_graph->node_num],tmp;
 		int size = 1;
-		Adj *tmp_adj = tmp->node_list[addr];
+		
+		tmp_graph->node_list[addr].query_num++;
+		Adj *tmp_adj = tmp_graph->node_list[addr].adjacent_list_head;
 		while(tmp_adj != NULL){
-			array[size - 1] = tmp->node_list[tmp_adj->addr];
+			array[size - 1] = tmp_graph->node_list[tmp_adj->addr];
+			tmp_adj = tmp_adj->next;
+			size++;
 		}
 		
+		int i,j,max;
+		for (i = 0; i < size - 1; i++) {
+			max = i;
+			for (j = i; j < size; j++) {
+				if (array[j].query_num > array[max].query_num)
+					max = j;
+			}
+			
+			tmp = array[i];
+			array[max] = tmp;
+			array[i] = array[max];
+		}
+		
+		if(size > 1){
+			printf("\n--Aradiginiza yakın ençok aranan ilk üç string--\n");
+			if(size > 2){
+			printf("1. arama ve arama sayisi:%s(%d)\n",array[0].query_str,array[0].query_num);
+			}
+			if(size > 3){
+			printf("2. arama ve arama sayisi:%s(%d)\n",array[1].query_str,array[1].query_num);
+			}
+			if(size > 4){
+			printf("3. arama ve arama sayisi:%s(%d)\n",array[2].query_str,array[2].query_num);
+			}
+			
+		}
+		else{
+			printf("\n--Aradiginiza yakın stringler buklunamamıstır--\n");
+		}
 		
 	}
 	
@@ -241,14 +292,14 @@ int main(void) {
     int node_list_size1 = 0;
     int node_list_size2 = 0;
     int node_list_size3 = 0;
-	int node_size,adj_size,adj_count,node_count,i,j;
-    char node_str[MAX],adj_str[MAX];
+	int node_size,adj_size,adj_count,node_count,i,j,len;
+    char node_str[MAX],adj_str[MAX],*operation;
     
     Graph *graph1 = (Graph *)malloc(sizeof(Graph));
     graph1->node_num = 4;
     addNodeandAdjacent(graph1,"abc","def",3,4,&node_list_size1);
-    addNodeandAdjacent(graph1,"abc","ghi",7,3,&node_list_size1);
-    addNodeandAdjacent(graph1,"abc","jkl",8,3,&node_list_size1);
+    addNodeandAdjacent(graph1,"abc","ghi",3,7,&node_list_size1);
+    addNodeandAdjacent(graph1,"abc","jkl",3,8,&node_list_size1);
     printf("\n----------Arama Grafi giris kismi------------\n");
     
     printf("\n----------Birinci arama Graf verilerini giriniz------------\n");
@@ -280,11 +331,11 @@ int main(void) {
     printGraph(graph1,node_list_size1);
 	
     Graph *graph2 = (Graph *)malloc(sizeof(Graph));
-    graph1->node_num = 5;
-    addNodeandAdjacent(graph1,"mnp","opr",node_count,adj_count,&node_list_size2);
-    addNodeandAdjacent(graph1,"mnp","ghi",node_count,adj_count,&node_list_size2);
-    addNodeandAdjacent(graph1,"mnp","stu",node_count,adj_count,&node_list_size2);
-    addNodeandAdjacent(graph1,"mnp","def",node_count,adj_count,&node_list_size2);
+    graph2->node_num = 5;
+    addNodeandAdjacent(graph2,"mnp","opr",4,5,&node_list_size2);
+    addNodeandAdjacent(graph2,"mnp","ghi",4,7,&node_list_size2);
+    addNodeandAdjacent(graph2,"mnp","stu",4,2,&node_list_size2);
+    addNodeandAdjacent(graph2,"mnp","def",4,8,&node_list_size2);
 	printf("\n----------İkinci arama Graf verilerini giriniz------------\n");
     /*printf("Arama grafinda aranacak sorgu string dugum sayisi:");
     scanf("%d",&node_size);
@@ -315,25 +366,32 @@ int main(void) {
     
 	Graph *graph3 = (Graph *)malloc(sizeof(Graph));
     printf("\n----------İki Arama Grafi birlesim kismi------------\n");
-    mergeTwoGraph(graph1,graph2,graph3,node_list_size3);
+    mergeTwoGraph(graph1,graph2,graph3,&node_list_size3);
     printf("\n----------Birleşik Graf alt liste halinde düğümler ve okla gözterilen bağlantılı aramalar------------\n");
     printGraph(graph3,node_list_size3);
     
-    /*printf("\n----------İki Arama Grafi arama kismi------------\n");
+    printf("\n----------İki Arama Grafi arama kismi------------\n");
     
-    int end
+    int end = 0;
+    operation = (char *)malloc(MAX * sizeof(char));
     do{
-    	
+    	printf("\nAradiginiz stringi giriniz:");
         memset(operation,0,strlen(operation));
-        if(fgets(operation, LINE, stdin) == NULL){
+        if(fgets(operation, MAX, stdin) == NULL){
             printf("Error reading from input\n");
 	    	return 1;
         }
-        if(operation = -1)
         
-        searchInGraph(graph3,operation);
+        len = strlen(operation);
+        operation[len - 1] = '\0';
+        if(strcmp(operation,"-1") == 0){
+        	end = 1;
+		}
+        else{
+        	searchInGraph(graph3,operation);
+		}
     	
-	}while();*/
+	}while(!end);
 	
 	
     return 0;
